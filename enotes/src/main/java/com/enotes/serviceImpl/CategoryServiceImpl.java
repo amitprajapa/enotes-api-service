@@ -2,6 +2,7 @@ package com.enotes.serviceImpl;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,7 +46,7 @@ public class CategoryServiceImpl implements CategoryService {
 
 	@Override
 	public List<CategoryDto> getAllCategory() {
-		List<Category> categories = categoryRepository.findAll();
+		List<Category> categories = categoryRepository.findByIsDeletedFalse();
 		
 		List<CategoryDto> categoriesList = categories.stream().map(cat->mapper.map(cat,  CategoryDto.class)).toList();
 		return categoriesList;
@@ -53,9 +54,43 @@ public class CategoryServiceImpl implements CategoryService {
 
 	@Override
 	public List<CategoryResponse> getActiveCategory() {
-		List<Category> all = categoryRepository.findByIsActiveTrue();
+		List<Category> all = categoryRepository.findByIsActiveTrueAndIsDeletedFalse();
 		List<CategoryResponse> list = all.stream().map(cat->mapper.map(cat, CategoryResponse.class)).toList();
 		return list;
+	}
+
+	@Override
+	public CategoryDto getCategoryById(Integer id) {
+		Optional<Category> finOptional = categoryRepository.findByIdAndIsDeletedFalse(id);
+		if(finOptional.isPresent()) {
+			Category category = finOptional.get();
+			return mapper.map(category, CategoryDto.class);
+		}
+		return null;
+	}
+
+	@Override
+	public Boolean deleteCatogeryById(Integer id) {
+		try {
+			Optional<Category> finOptional = categoryRepository.findById(id);
+			if(finOptional.isPresent()) {
+				Category category = finOptional.get();
+				category.setIsDeleted(true);
+				categoryRepository.save(category);
+				return true;
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+		return null;
+	}
+
+	@Override
+	public List<CategoryDto> findByIsDeletedFalse() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 	

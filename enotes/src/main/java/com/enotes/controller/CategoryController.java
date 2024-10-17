@@ -6,7 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.ObjectUtils;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,9 +51,9 @@ public class CategoryController {
 		
 	}
 	
-	@GetMapping("/category")
+	@GetMapping("/")
 	public ResponseEntity<?> getAllCategory(@RequestBody Category category){
-		List<CategoryDto> allCategory = categoryService.getAllCategory();
+		List<CategoryDto> allCategory = categoryService.findByIsDeletedFalse();
 		if(CollectionUtils.isEmpty(allCategory)) {
 			return ResponseEntity.noContent().build();
 		} else {
@@ -69,5 +72,34 @@ public class CategoryController {
 		}
 		
 	}
-
+	
+	@GetMapping("/{id}")
+	public ResponseEntity<?> getCategoryDetailsById(@PathVariable Integer id){
+		try {
+		CategoryDto categoryDto = categoryService.getCategoryById(id);
+		if(ObjectUtils.isEmpty(categoryDto)) {
+			return new ResponseEntity<>("category not found with id = "+id,HttpStatus.NOT_FOUND);
+		}
+		return  new ResponseEntity<>(categoryDto,HttpStatus.NOT_FOUND);
+	   }
+		catch (Exception e) {
+			e.printStackTrace();
+			return  new ResponseEntity<>("Exception found",HttpStatus.EXPECTATION_FAILED);
+		}
+}
+	
+	@DeleteMapping("/{id}")
+	public ResponseEntity<?> deleteCatogeryById(@PathVariable Integer id){
+		try {
+		Boolean bolean = categoryService.deleteCatogeryById(id);
+		if(bolean) {
+			return new ResponseEntity<>("category deleted success ",HttpStatus.OK);
+		}
+		return  new ResponseEntity<>("category not deleted",HttpStatus.INTERNAL_SERVER_ERROR);
+	   }
+		catch (Exception e) {
+			e.printStackTrace();
+			return  new ResponseEntity<>("Exception found",HttpStatus.EXPECTATION_FAILED);
+		}
+}
 }
