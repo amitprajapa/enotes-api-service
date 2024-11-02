@@ -18,8 +18,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.enotes.dto.CategoryDto;
 import com.enotes.dto.CategoryResponse;
 import com.enotes.entity.Category;
+import com.enotes.exception.ResourceNotFoundException;
 import com.enotes.service.CategoryService;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/category")
 public class CategoryController {
@@ -74,18 +78,14 @@ public class CategoryController {
 	}
 	
 	@GetMapping("/{id}")
-	public ResponseEntity<?> getCategoryDetailsById(@PathVariable Integer id){
-		try {
+	public ResponseEntity<?> getCategoryDetailsById(@PathVariable Integer id) throws ResourceNotFoundException{
+		
 		CategoryDto categoryDto = categoryService.getCategoryById(id);
 		if(ObjectUtils.isEmpty(categoryDto)) {
-			return new ResponseEntity<>("category not found with id = "+id,HttpStatus.NOT_FOUND);
+			return new ResponseEntity<>("InternalServerError",HttpStatus.NOT_FOUND);
 		}
 		return  new ResponseEntity<>(categoryDto,HttpStatus.NOT_FOUND);
-	   }
-		catch (Exception e) {
-			e.printStackTrace();
-			return  new ResponseEntity<>("Exception found",HttpStatus.EXPECTATION_FAILED);
-		}
+	   
 }
 	
 	@DeleteMapping("/{id}")
